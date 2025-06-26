@@ -1,72 +1,71 @@
-# etsy-mcp-server MCP Server
+# Etsy MCP Server
 
-MCP server for the Etsy API. See https://developers.etsy.com/documentation/reference
+This project exposes a subset of the [Etsy API](https://developers.etsy.com/) through the Model Context Protocol.  It allows tools to be called from an MCP client to retrieve shop data and manage listings.
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
+## OAuth setup
 
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+The server requires a valid Etsy API keystring, shared secret and OAuth refresh token.  You can supply them via the `ETSY_API_KEY`, `ETSY_SHARED_SECRET` and `ETSY_REFRESH_TOKEN` environment variables or by creating a `cline_mcp_settings.json` file based on `cline_mcp_settings.example.json`.
 
-## Features
+If you do not yet have a refresh token, run the helper script:
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+```bash
+node get-refresh-token.js --keystring YOUR_KEY --shared-secret YOUR_SECRET
+```
 
-### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
-- `uploadListingImage` - Upload an image for a listing
-  - `image_path` must be a valid path to an existing image file
-
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+The script opens a browser window for authentication and prints the refresh token to the console.
 
 ## Development
 
-Install dependencies:
+Install dependencies and build the server:
+
 ```bash
 npm install
-```
-
-Build the server:
-```bash
 npm run build
 ```
 
-For development with auto-rebuild:
+During development you can auto rebuild with:
+
 ```bash
 npm run watch
 ```
 
-## Installation
+## Running
 
-To use with Claude Desktop, add the server config:
+After building, start the server with:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "etsy-mcp-server": {
-      "command": "/path/to/etsy-mcp-server/build/index.js"
-    }
-  }
-}
+```bash
+node build/index.js
 ```
 
-### Debugging
+## Available tools
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+### `getShop`
+Fetch information about a shop.
+Required argument: `shop_id`.
+
+### `getListingsByShop`
+List the listings in a shop. Supports an optional `state` parameter (e.g. `active`, `draft`).  Requires `shop_id`.
+
+### `createDraftListing`
+Create a new draft listing. Required parameters include:
+`shop_id`, `title`, `description`, `price`, `quantity`, `who_made`, `when_made`, and `taxonomy_id`.
+
+### `uploadListingImage`
+Upload an image to a listing. Requires `shop_id`, `listing_id` and `image_path`.
+(Implementation is currently a placeholder.)
+
+### `updateListing`
+Update an existing listing. Requires `shop_id` and `listing_id`. Optional fields include `title`, `description` and `price`.
+
+### `getShopReceipts`
+Retrieve receipts for a shop. Requires `shop_id`.
+
+## Debugging
+
+The server communicates over stdio. For debugging you can launch it with the MCP Inspector:
 
 ```bash
 npm run inspector
 ```
 
-The Inspector will provide a URL to access debugging tools in your browser.
+The inspector prints a URL that you can open in a browser to view communication logs and inspect messages.
