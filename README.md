@@ -37,6 +37,26 @@ After building, start the server with:
 node build/index.js
 ```
 
+### Docker
+
+Alternatively you can run the server in a Docker container. Build the image from
+the repository root:
+
+```bash
+docker build -t etsy-mcp-server .
+```
+
+Then start the container, supplying your Etsy credentials as environment
+variables:
+
+```bash
+docker run --rm \
+  -e ETSY_API_KEY=YOUR_KEY \
+  -e ETSY_SHARED_SECRET=YOUR_SECRET \
+  -e ETSY_REFRESH_TOKEN=YOUR_TOKEN \
+  etsy-mcp-server
+```
+
 ## Available tools
 
 ### `getShop`
