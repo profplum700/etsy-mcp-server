@@ -88,6 +88,14 @@ class EtsyServer {
           },
         },
         {
+          name: 'getMe',
+          description: 'Get info about the authenticated user',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
             name: 'getListingsByShop',
             description: 'Get listings for a given shop',
             inputSchema: {
@@ -225,6 +233,9 @@ class EtsyServer {
         switch (request.params.name) {
           case 'getShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}`);
+            break;
+          case 'getMe':
+            response = await this.axiosInstance.get('/application/users/me');
             break;
           case 'getListingsByShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/listings`, { params: { state: request.params.arguments.state } });
