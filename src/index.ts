@@ -11,6 +11,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import FormData from 'form-data';
 
 let API_KEY: string | undefined = process.env.ETSY_API_KEY;
 let SHARED_SECRET: string | undefined = process.env.ETSY_SHARED_SECRET;
@@ -141,7 +142,7 @@ class EtsyServer {
                 properties: {
                     shop_id: { type: 'string', description: 'The ID of the shop' },
                     listing_id: { type: 'string', description: 'The ID of the listing' },
-                    image_path: { type: 'string', description: 'The path to the image to upload' },
+                    image_path: { type: 'string', description: 'Filesystem path to the image file to upload. The file must exist.' },
                 },
                 required: ['shop_id', 'listing_id', 'image_path'],
             },
@@ -192,10 +193,27 @@ class EtsyServer {
           case 'createDraftListing':
             response = await this.axiosInstance.post(`/application/shops/${request.params.arguments.shop_id}/listings`, request.params.arguments);
             break;
-          case 'uploadListingImage':
-            // This is a placeholder. Actual implementation would require reading the file and sending it as multipart/form-data
-            response = { data: { success: true, message: "Image upload placeholder" } };
+          case 'uploadListingImage': {
+            const { shop_id, listing_id, image_path } = request.params.arguments as {
+              shop_id: string;
+              listing_id: string;
+              image_path: string;
+            };
+            if (!fs.existsSync(image_path)) {
+              throw new McpError(
+                ErrorCode.InvalidRequest,
+                `File not found: ${image_path}`
+              );
+            }
+            const form = new FormData();
+            form.append('image', fs.createReadStream(image_path));
+            response = await this.axiosInstance.post(
+              `/application/shops/${shop_id}/listings/${listing_id}/images`,
+              form,
+              { headers: form.getHeaders() }
+            );
             break;
+          }
           case 'updateListing':
             response = await this.axiosInstance.patch(`/application/shops/${request.params.arguments.shop_id}/listings/${request.params.arguments.listing_id}`, request.params.arguments);
             break;

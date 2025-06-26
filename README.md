@@ -19,6 +19,8 @@ This is a TypeScript-based MCP server that implements a simple notes system. It 
 - `create_note` - Create new text notes
   - Takes title and content as required parameters
   - Stores note in server state
+- `uploadListingImage` - Upload an image for a listing
+  - `image_path` must be a valid path to an existing image file
 
 ### Prompts
 - `summarize_notes` - Generate a summary of all stored notes
