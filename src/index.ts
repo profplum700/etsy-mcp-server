@@ -171,6 +171,62 @@ class EtsyServer {
                 },
                 required: ['shop_id'],
             },
+        },
+        {
+            name: 'getListingImages',
+            description: 'Get images for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'getListingFiles',
+            description: 'Get files for a digital listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'getListingInventory',
+            description: 'Get inventory details for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'updateListingInventory',
+            description: 'Update inventory for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                    products: { type: 'array', description: 'Inventory products' },
+                },
+                required: ['listing_id', 'products'],
+            },
+        },
+        {
+            name: 'getShopPolicies',
+            description: 'Get shop policies',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                },
+                required: ['shop_id'],
+            },
         }
       ],
     }));
@@ -201,6 +257,21 @@ class EtsyServer {
             break;
           case 'getShopReceipts':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/receipts`);
+            break;
+          case 'getListingImages':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/images`);
+            break;
+          case 'getListingFiles':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/files`);
+            break;
+          case 'getListingInventory':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/inventory`);
+            break;
+          case 'updateListingInventory':
+            response = await this.axiosInstance.put(`/application/listings/${request.params.arguments.listing_id}/inventory`, { products: request.params.arguments.products });
+            break;
+          case 'getShopPolicies':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/policies`);
             break;
           default:
             throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
