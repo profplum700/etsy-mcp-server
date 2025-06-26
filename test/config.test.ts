@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
 import { loadEtsyConfig } from '../src/config.js';
