@@ -1,0 +1,8 @@
+{
+  "etsy-mcp-server": {
+    "keystring": "<YOUR_KEY>",
+    "sharedSecret": "<YOUR_SHARED_SECRET>",
+    "refreshToken": "<YOUR_REFRESH_TOKEN>",
+    "port": 3030
+  }
+}

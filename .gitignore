@@ -2,3 +2,4 @@ node_modules/
 build/
 *.log
 .env*
+etsy_mcp_settings.json
