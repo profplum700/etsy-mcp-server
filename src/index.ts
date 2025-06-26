@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
+import querystring from 'querystring';
 import { loadEtsyConfig } from './config.js';
 
 const {
@@ -228,9 +229,16 @@ class EtsyServer {
           case 'getListingsByShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/listings`, { params: { state: request.params.arguments.state } });
             break;
-          case 'createDraftListing':
-            response = await this.axiosInstance.post(`/application/shops/${request.params.arguments.shop_id}/listings`, request.params.arguments);
+          case 'createDraftListing': {
+            const { shop_id, ...rest } = request.params.arguments as Record<string, any>;
+            const payload = querystring.stringify(rest as any);
+            response = await this.axiosInstance.post(
+              `/application/shops/${shop_id}/listings`,
+              payload,
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            );
             break;
+          }
           case 'uploadListingImage': {
             const { shop_id, listing_id, image_path } = request.params.arguments as {
               shop_id: string;

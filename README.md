@@ -50,8 +50,8 @@ List the listings in a shop. Supports an optional `state` parameter (e.g. `activ
 
 ### `createDraftListing`
 
-Create a new draft listing. Required parameters include:
-`shop_id`, `title`, `description`, `price`, `quantity`, `who_made`, `when_made`, and `taxonomy_id`.
+Create a new physical draft listing using `POST /v3/application/shops/{shop_id}/listings`.
+The tool accepts all fields supported by Etsy's `createDraftListing` endpoint.
 
 ### `uploadListingImage`
 
