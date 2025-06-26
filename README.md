@@ -42,6 +42,22 @@ For development with auto-rebuild:
 npm run watch
 ```
 
+## Configuration
+
+Copy `cline_mcp_settings.example.json` to `cline_mcp_settings.json` and replace
+the placeholder values with your Etsy API credentials:
+
+```bash
+cp cline_mcp_settings.example.json cline_mcp_settings.json
+# then edit cline_mcp_settings.json
+```
+
+The server reads these values when the `ETSY_API_KEY`, `ETSY_SHARED_SECRET`, and
+`ETSY_REFRESH_TOKEN` environment variables are not set.
+
+You can instead set those environment variables directly when launching the
+server if you prefer not to store a local settings file.
+
 ## Installation
 
 To use with Claude Desktop, add the server config:
