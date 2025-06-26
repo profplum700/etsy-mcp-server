@@ -1,7 +1,7 @@
-import { describe, it, expect, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { afterEach, describe, expect, it } from 'vitest';
 import { loadEtsyConfig } from '../src/config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

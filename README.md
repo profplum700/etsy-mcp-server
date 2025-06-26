@@ -70,6 +70,12 @@ Update an existing listing. Requires `shop_id` and `listing_id`. Optional fields
 
 Retrieve receipts for a shop. Requires `shop_id`.
 
+### `getShopSections`
+Retrieve the list of sections in a shop. Requires `shop_id`.
+
+### `getShopSection`
+Retrieve a single shop section by `shop_id` and `shop_section_id`.
+
 ## Debugging
 
 The server communicates over stdio. For debugging you can launch it with the MCP Inspector:

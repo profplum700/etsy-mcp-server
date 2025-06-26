@@ -219,6 +219,29 @@ class EtsyServer {
                 },
                 required: ['shop_id'],
             },
+        },
+        {
+            name: 'getShopSections',
+            description: 'Get sections for a shop',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                },
+                required: ['shop_id'],
+            },
+        },
+        {
+            name: 'getShopSection',
+            description: 'Get a single shop section',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                    shop_section_id: { type: 'string', description: 'The ID of the shop section' },
+                },
+                required: ['shop_id', 'shop_section_id'],
+            },
         }
       ],
     }));
@@ -291,6 +314,12 @@ class EtsyServer {
             break;
           case 'getShopPolicies':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/policies`);
+            break;
+          case 'getShopSections':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/sections`);
+            break;
+          case 'getShopSection':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/sections/${request.params.arguments.shop_section_id}`);
             break;
           default:
             throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
