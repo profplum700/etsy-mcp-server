@@ -3,6 +3,6 @@ export default {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1.ts'
+    '^(\\.{1,2}/src/.*)\\.js$': '$1.ts'
   }
 };
