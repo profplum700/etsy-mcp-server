@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from '@jest/globals';
+import { describe, it, expect, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { loadEtsyConfig } from '../src/config.js';
@@ -47,7 +47,7 @@ describe('loadEtsyConfig', () => {
     delete process.env.ETSY_API_KEY;
     delete process.env.ETSY_SHARED_SECRET;
     delete process.env.ETSY_REFRESH_TOKEN;
-    expect(() => loadEtsyConfig()).toThrowError(
+    expect(() => loadEtsyConfig()).toThrow(
       'ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required'
     );
   });
