@@ -68,3 +68,24 @@ npm run inspector
 ```
 
 The Inspector will provide a URL to access debugging tools in your browser.
+
+## Docker
+
+The provided Dockerfile uses Node 22.
+
+To build the Docker image:
+```bash
+docker build -t etsy-mcp-server .
+```
+
+Run the server container, providing your Etsy credentials as environment variables:
+```bash
+docker run \
+  -e ETSY_API_KEY=your_api_key \
+  -e ETSY_SHARED_SECRET=your_shared_secret \
+  -e ETSY_REFRESH_TOKEN=your_refresh_token \
+  etsy-mcp-server
+```
+
+The server communicates over stdio so it will start immediately when the container runs.
+
