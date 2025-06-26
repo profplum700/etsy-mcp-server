@@ -8,6 +8,7 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
+import querystring from 'querystring';
 import { loadEtsyConfig } from './config.js';
 
 const {
@@ -226,9 +227,16 @@ class EtsyServer {
           case 'getListingsByShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/listings`, { params: { state: request.params.arguments.state } });
             break;
-          case 'createDraftListing':
-            response = await this.axiosInstance.post(`/application/shops/${request.params.arguments.shop_id}/listings`, request.params.arguments);
+          case 'createDraftListing': {
+            const { shop_id, ...rest } = request.params.arguments as Record<string, any>;
+            const payload = querystring.stringify(rest as any);
+            response = await this.axiosInstance.post(
+              `/application/shops/${shop_id}/listings`,
+              payload,
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            );
             break;
+          }
           case 'uploadListingImage':
             // This is a placeholder. Actual implementation would require reading the file and sending it as multipart/form-data
             response = { data: { success: true, message: "Image upload placeholder" } };

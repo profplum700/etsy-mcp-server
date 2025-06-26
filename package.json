@@ -16,7 +16,7 @@
     "start": "node build/index.js",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",

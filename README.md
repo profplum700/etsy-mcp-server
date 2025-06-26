@@ -47,8 +47,24 @@ Required argument: `shop_id`.
 List the listings in a shop. Supports an optional `state` parameter (e.g. `active`, `draft`).  Requires `shop_id`.
 
 ### `createDraftListing`
-Create a new draft listing. Required parameters include:
-`shop_id`, `title`, `description`, `price`, `quantity`, `who_made`, `when_made`, and `taxonomy_id`.
+Create a new physical draft listing using `POST /v3/application/shops/{shop_id}/listings`.
+The tool accepts all fields supported by Etsy's `createDraftListing` endpoint.
+
+**Required parameters**
+
+* `shop_id` – numeric shop ID
+* `quantity` – available quantity
+* `title` – listing title
+* `description` – listing description
+* `price` – item price
+* `who_made` – one of `i_did`, `someone_else`, `collective`
+* `when_made` – era value such as `made_to_order`, `2020_2025`, etc.
+* `taxonomy_id` – numeric taxonomy identifier
+
+When `type` is `physical`, `shipping_profile_id` is also required. Additional
+optional fields like `tags`, `materials`, `styles`, weight and dimension
+attributes, personalization fields and others may be supplied as documented in
+the Etsy API.
 
 ### `uploadListingImage`
 Upload an image to a listing. Requires `shop_id`, `listing_id` and `image_path`.

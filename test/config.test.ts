@@ -1,8 +1,10 @@
 import { describe, it, expect, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { loadEtsyConfig } from '../src/config.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
 
 function cleanup() {

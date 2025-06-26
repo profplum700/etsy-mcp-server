@@ -3,6 +3,9 @@ export default {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1.ts'
+    '^\.\./src/(.*)\\.js$': '<rootDir>/src/$1.ts'
+  },
+  transform: {
+    '^.+\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.json' }]
   }
 };
