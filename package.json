@@ -15,7 +15,8 @@
     "prepare": "npm run build",
     "start": "node build/index.js",
     "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",
@@ -24,7 +25,11 @@
     "open": "^10.1.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.4",
+    "@vitest/ui": "^3.2.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.4"
   }
 }

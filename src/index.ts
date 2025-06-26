@@ -8,32 +8,16 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
+import FormData from 'form-data';
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import querystring from 'querystring';
+import { loadEtsyConfig } from './config.js';
 
-let API_KEY: string | undefined = process.env.ETSY_API_KEY;
-let SHARED_SECRET: string | undefined = process.env.ETSY_SHARED_SECRET;
-let REFRESH_TOKEN: string | undefined = process.env.ETSY_REFRESH_TOKEN;
-
-if (!API_KEY || !SHARED_SECRET || !REFRESH_TOKEN) {
-  // Attempt to load from cline_mcp_settings.json in project root
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
-    const raw = fs.readFileSync(settingsPath, 'utf-8');
-    const cfg = JSON.parse(raw)["etsy-mcp-server"] ?? {};
-    API_KEY = API_KEY || cfg.keystring;
-    SHARED_SECRET = SHARED_SECRET || cfg.sharedSecret;
-    REFRESH_TOKEN = REFRESH_TOKEN || cfg.refreshToken;
-  } catch {
-    // ignore – handled below if still undefined
-  }
-}
-
-if (!API_KEY || !SHARED_SECRET || !REFRESH_TOKEN) {
-  throw new Error('ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required');
-}
+const {
+  apiKey: API_KEY,
+  sharedSecret: SHARED_SECRET,
+  refreshToken: REFRESH_TOKEN,
+} = loadEtsyConfig();
 
 class EtsyServer {
   private server: Server;
@@ -104,6 +88,14 @@ class EtsyServer {
           },
         },
         {
+          name: 'getMe',
+          description: 'Get info about the authenticated user',
+          inputSchema: {
+            type: 'object',
+            properties: {},
+          },
+        },
+        {
             name: 'getListingsByShop',
             description: 'Get listings for a given shop',
             inputSchema: {
@@ -141,7 +133,7 @@ class EtsyServer {
                 properties: {
                     shop_id: { type: 'string', description: 'The ID of the shop' },
                     listing_id: { type: 'string', description: 'The ID of the listing' },
-                    image_path: { type: 'string', description: 'The path to the image to upload' },
+                    image_path: { type: 'string', description: 'Filesystem path to the image file to upload. The file must exist.' },
                 },
                 required: ['shop_id', 'listing_id', 'image_path'],
             },
@@ -171,6 +163,85 @@ class EtsyServer {
                 },
                 required: ['shop_id'],
             },
+        },
+        {
+            name: 'getListingImages',
+            description: 'Get images for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'getListingFiles',
+            description: 'Get files for a digital listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'getListingInventory',
+            description: 'Get inventory details for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                },
+                required: ['listing_id'],
+            },
+        },
+        {
+            name: 'updateListingInventory',
+            description: 'Update inventory for a listing',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    listing_id: { type: 'string', description: 'The ID of the listing' },
+                    products: { type: 'array', description: 'Inventory products' },
+                },
+                required: ['listing_id', 'products'],
+            },
+        },
+        {
+            name: 'getShopPolicies',
+            description: 'Get shop policies',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                },
+                required: ['shop_id'],
+            },
+        },
+        {
+            name: 'getShopSections',
+            description: 'Get sections for a shop',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                },
+                required: ['shop_id'],
+            },
+        },
+        {
+            name: 'getShopSection',
+            description: 'Get a single shop section',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    shop_id: { type: 'string', description: 'The ID of the shop' },
+                    shop_section_id: { type: 'string', description: 'The ID of the shop section' },
+                },
+                required: ['shop_id', 'shop_section_id'],
+            },
         }
       ],
     }));
@@ -186,21 +257,69 @@ class EtsyServer {
           case 'getShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}`);
             break;
+          case 'getMe':
+            response = await this.axiosInstance.get('/application/users/me');
+            break;
           case 'getListingsByShop':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/listings`, { params: { state: request.params.arguments.state } });
             break;
-          case 'createDraftListing':
-            response = await this.axiosInstance.post(`/application/shops/${request.params.arguments.shop_id}/listings`, request.params.arguments);
+          case 'createDraftListing': {
+            const { shop_id, ...rest } = request.params.arguments as Record<string, any>;
+            const payload = querystring.stringify(rest as any);
+            response = await this.axiosInstance.post(
+              `/application/shops/${shop_id}/listings`,
+              payload,
+              { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+            );
             break;
-          case 'uploadListingImage':
-            // This is a placeholder. Actual implementation would require reading the file and sending it as multipart/form-data
-            response = { data: { success: true, message: "Image upload placeholder" } };
+          }
+          case 'uploadListingImage': {
+            const { shop_id, listing_id, image_path } = request.params.arguments as {
+              shop_id: string;
+              listing_id: string;
+              image_path: string;
+            };
+            if (!fs.existsSync(image_path)) {
+              throw new McpError(
+                ErrorCode.InvalidRequest,
+                `File not found: ${image_path}`
+              );
+            }
+            const form = new FormData();
+            form.append('image', fs.createReadStream(image_path));
+            response = await this.axiosInstance.post(
+              `/application/shops/${shop_id}/listings/${listing_id}/images`,
+              form,
+              { headers: form.getHeaders() }
+            );
             break;
+          }
           case 'updateListing':
             response = await this.axiosInstance.patch(`/application/shops/${request.params.arguments.shop_id}/listings/${request.params.arguments.listing_id}`, request.params.arguments);
             break;
           case 'getShopReceipts':
             response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/receipts`);
+            break;
+          case 'getListingImages':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/images`);
+            break;
+          case 'getListingFiles':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/files`);
+            break;
+          case 'getListingInventory':
+            response = await this.axiosInstance.get(`/application/listings/${request.params.arguments.listing_id}/inventory`);
+            break;
+          case 'updateListingInventory':
+            response = await this.axiosInstance.put(`/application/listings/${request.params.arguments.listing_id}/inventory`, { products: request.params.arguments.products });
+            break;
+          case 'getShopPolicies':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/policies`);
+            break;
+          case 'getShopSections':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/sections`);
+            break;
+          case 'getShopSection':
+            response = await this.axiosInstance.get(`/application/shops/${request.params.arguments.shop_id}/sections/${request.params.arguments.shop_section_id}`);
             break;
           default:
             throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
