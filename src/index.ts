@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 let API_KEY: string | undefined = process.env.ETSY_API_KEY;
 let SHARED_SECRET: string | undefined = process.env.ETSY_SHARED_SECRET;
@@ -18,7 +19,8 @@ let REFRESH_TOKEN: string | undefined = process.env.ETSY_REFRESH_TOKEN;
 if (!API_KEY || !SHARED_SECRET || !REFRESH_TOKEN) {
   // Attempt to load from cline_mcp_settings.json in project root
   try {
-    const settingsPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../cline_mcp_settings.json');
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
     const raw = fs.readFileSync(settingsPath, 'utf-8');
     const cfg = JSON.parse(raw)["etsy-mcp-server"] ?? {};
     API_KEY = API_KEY || cfg.keystring;
