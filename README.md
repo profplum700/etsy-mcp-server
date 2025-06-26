@@ -43,6 +43,10 @@ node build/index.js
 Fetch information about a shop.
 Required argument: `shop_id`.
 
+### `getMe`
+Return basic info about the authenticated user, including `user_id` and
+`shop_id`. This endpoint takes no arguments.
+
 ### `getListingsByShop`
 List the listings in a shop. Supports an optional `state` parameter (e.g. `active`, `draft`).  Requires `shop_id`.
 
