@@ -1,6 +1,6 @@
 # etsy-mcp-server MCP Server
 
-MCP server for the Etsy API
+MCP server for the Etsy API. See https://developers.etsy.com/documentation/reference
 
 This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
 
