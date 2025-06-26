@@ -8,10 +8,9 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import FormData from 'form-data';
+import fs from 'fs';
+import { loadEtsyConfig } from './config.js';
 
 const {
   apiKey: API_KEY,
