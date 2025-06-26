@@ -8,32 +8,13 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { loadEtsyConfig } from './config.js';
 
-let API_KEY: string | undefined = process.env.ETSY_API_KEY;
-let SHARED_SECRET: string | undefined = process.env.ETSY_SHARED_SECRET;
-let REFRESH_TOKEN: string | undefined = process.env.ETSY_REFRESH_TOKEN;
-
-if (!API_KEY || !SHARED_SECRET || !REFRESH_TOKEN) {
-  // Attempt to load from cline_mcp_settings.json in project root
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
-    const raw = fs.readFileSync(settingsPath, 'utf-8');
-    const cfg = JSON.parse(raw)["etsy-mcp-server"] ?? {};
-    API_KEY = API_KEY || cfg.keystring;
-    SHARED_SECRET = SHARED_SECRET || cfg.sharedSecret;
-    REFRESH_TOKEN = REFRESH_TOKEN || cfg.refreshToken;
-  } catch {
-    // ignore – handled below if still undefined
-  }
-}
-
-if (!API_KEY || !SHARED_SECRET || !REFRESH_TOKEN) {
-  throw new Error('ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required');
-}
+const {
+  apiKey: API_KEY,
+  sharedSecret: SHARED_SECRET,
+  refreshToken: REFRESH_TOKEN,
+} = loadEtsyConfig();
 
 class EtsyServer {
   private server: Server;
