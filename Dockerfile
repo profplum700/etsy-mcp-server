@@ -1,19 +1,20 @@
 # Use Node LTS version
-FROM node:20-slim
+FROM node:22-slim
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# Copy package files and source code first (needed for prepare script during npm ci)
 COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Copy source code
 COPY tsconfig.json ./
 COPY src ./src
 
-# Build the TypeScript project
-RUN npm run build
+# Install app dependencies (including dev dependencies for build)
+# The prepare script will run during npm ci and build the project
+RUN npm ci
+
+# Remove dev dependencies to reduce image size
+RUN npm prune --omit=dev
 
 # Expose port if server uses one (not necessary for MCP, using stdio)
 
