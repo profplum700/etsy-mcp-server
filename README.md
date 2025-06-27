@@ -76,6 +76,12 @@ Retrieve the list of sections in a shop. Requires `shop_id`.
 ### `getShopSection`
 Retrieve a single shop section by `shop_id` and `shop_section_id`.
 
+### `getSellerTaxonomyNodes`
+Retrieve the full hierarchy of seller taxonomy nodes.
+
+### `getPropertiesByTaxonomyId`
+List product properties supported for a specific taxonomy node. Requires `taxonomy_id`.
+
 ## Debugging
 
 The server communicates over stdio. For debugging you can launch it with the MCP Inspector:
