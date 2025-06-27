@@ -4,4 +4,3 @@ build
 .github
 test
 *.log
-etsy_mcp_settings.json
