@@ -17,7 +17,7 @@ let argPort: number | undefined;
 
 for (let i = 0; i < cliArgs.length; i++) {
   const arg = cliArgs[i];
-  
+
   if (arg.startsWith("--keystring=")) {
     argKeystring = arg.split("=")[1];
   } else if (arg === "--keystring" && i + 1 < cliArgs.length) {
@@ -121,12 +121,14 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
     };
 
     console.log("\nOAuth Authentication Successful!");
-    console.log("=" .repeat(50));
+    console.log("=".repeat(50));
     console.log("Access Token:", access_token);
     console.log("Refresh Token:", refresh_token);
-    console.log("=" .repeat(50));
-    console.log("You can now use these tokens in your Etsy MCP server configuration.");
-    
+    console.log("=".repeat(50));
+    console.log(
+      "You can now use these tokens in your Etsy MCP server configuration.",
+    );
+
     res.send("Authentication successful! You can close this window.");
     readline.close();
     process.exit(0);
