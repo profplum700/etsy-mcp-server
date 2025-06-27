@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { loadEtsyConfig } from '../src/config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
+const settingsPath = path.join(__dirname, '..', 'etsy_mcp_settings.json');
 
 function cleanup() {
   if (fs.existsSync(settingsPath)) {

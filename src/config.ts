@@ -16,7 +16,7 @@ export function loadEtsyConfig(): EtsyConfig {
   if (!apiKey || !sharedSecret || !refreshToken) {
     try {
       const __dirname = path.dirname(fileURLToPath(import.meta.url));
-      const settingsPath = path.join(__dirname, '..', 'cline_mcp_settings.json');
+      const settingsPath = path.join(__dirname, '..', 'etsy_mcp_settings.json');
       const raw = fs.readFileSync(settingsPath, 'utf-8');
       const cfg = JSON.parse(raw)["etsy-mcp-server"] ?? {};
       apiKey = apiKey || cfg.keystring;

@@ -4,7 +4,7 @@ This project exposes a subset of the [Etsy API](https://developers.etsy.com/) th
 
 ## OAuth setup
 
-The server requires a valid Etsy API keystring, shared secret and OAuth refresh token. You can supply them via the `ETSY_API_KEY`, `ETSY_SHARED_SECRET` and `ETSY_REFRESH_TOKEN` environment variables or by creating a `cline_mcp_settings.json` file based on `cline_mcp_settings.example.json`.
+The server requires a valid Etsy API keystring, shared secret and OAuth refresh token. You can supply them via the `ETSY_API_KEY`, `ETSY_SHARED_SECRET` and `ETSY_REFRESH_TOKEN` environment variables or by creating a `etsy_mcp_settings.json` file based on `etsy_mcp_settings.example.json`.
 
 If you do not yet have a refresh token, run the helper script:
 
@@ -65,6 +65,7 @@ Fetch information about a shop.
 Required argument: `shop_id`.
 
 ### `getMe`
+
 Return basic info about the authenticated user, including `user_id` and
 `shop_id`. This endpoint takes no arguments.
 
@@ -91,9 +92,11 @@ Update an existing listing. Requires `shop_id` and `listing_id`. Optional fields
 Retrieve receipts for a shop. Requires `shop_id`.
 
 ### `getShopSections`
+
 Retrieve the list of sections in a shop. Requires `shop_id`.
 
 ### `getShopSection`
+
 Retrieve a single shop section by `shop_id` and `shop_section_id`.
 
 ## Debugging
