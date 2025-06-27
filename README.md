@@ -90,6 +90,7 @@ You can supply your Etsy credentials either as environment variables or by mount
 
 **Option 1: Using Environment Variables**
 
+**Bash:**
 ```bash
 docker run --rm \
   -e ETSY_API_KEY=YOUR_KEY \
@@ -98,13 +99,32 @@ docker run --rm \
   etsy-mcp-server
 ```
 
+**PowerShell:**
+```powershell
+docker run --rm `
+  -e ETSY_API_KEY=YOUR_KEY `
+  -e ETSY_SHARED_SECRET=YOUR_SECRET `
+  -e ETSY_REFRESH_TOKEN=YOUR_TOKEN `
+  etsy-mcp-server
+```
+
 **Option 2: Using a Settings File**
 
 Create an `etsy_mcp_settings.json` file in your current directory. Then, mount it into the container using the `-v` flag:
 
+**Bash:**
+
 ```bash
 docker run --rm \
   -v ./etsy_mcp_settings.json:/usr/src/app/etsy_mcp_settings.json \
+  etsy-mcp-server
+```
+
+**PowerShell:**
+
+```powershell
+docker run --rm `
+  -v ./etsy_mcp_settings.json:/usr/src/app/etsy_mcp_settings.json `
   etsy-mcp-server
 ```
 
@@ -176,9 +196,11 @@ Retrieve the list of sections in a shop. Requires `shop_id`.
 Retrieve a single shop section by `shop_id` and `shop_section_id`.
 
 ### `getSellerTaxonomyNodes`
+
 Retrieve the full hierarchy of seller taxonomy nodes.
 
 ### `getPropertiesByTaxonomyId`
+
 List product properties supported for a specific taxonomy node. Requires `taxonomy_id`.
 
 ## Debugging
