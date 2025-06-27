@@ -10,6 +10,7 @@ import {
 import axios from 'axios';
 import { tools as shopTools, handlers as shopHandlers } from './handlers/shop.js';
 import { tools as listingTools, handlers as listingHandlers } from './handlers/listing.js';
+import { tools as sellerTaxonomyTools, handlers as sellerTaxonomyHandlers } from './handlers/seller-taxonomy.js';
 import { loadEtsyConfig } from './config.js';
 
 const {
@@ -74,10 +75,11 @@ class EtsyServer {
 
 
   private setupToolHandlers() {
-    const allTools = [...shopTools, ...listingTools];
+    const allTools = [...shopTools, ...listingTools, ...sellerTaxonomyTools];
     const handlers = {
       ...shopHandlers,
       ...listingHandlers,
+      ...sellerTaxonomyHandlers,
     } as Record<string, (args: any, axios: any) => Promise<any>>;
 
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
