@@ -15,13 +15,24 @@ let argKeystring: string | undefined;
 let argSharedSecret: string | undefined;
 let argPort: number | undefined;
 
-for (const arg of cliArgs) {
+for (let i = 0; i < cliArgs.length; i++) {
+  const arg = cliArgs[i];
+  
   if (arg.startsWith("--keystring=")) {
     argKeystring = arg.split("=")[1];
+  } else if (arg === "--keystring" && i + 1 < cliArgs.length) {
+    argKeystring = cliArgs[i + 1];
+    i++; // Skip the next argument since we consumed it
   } else if (arg.startsWith("--shared-secret=")) {
     argSharedSecret = arg.split("=")[1];
+  } else if (arg === "--shared-secret" && i + 1 < cliArgs.length) {
+    argSharedSecret = cliArgs[i + 1];
+    i++; // Skip the next argument since we consumed it
   } else if (arg.startsWith("--port=")) {
     argPort = parseInt(arg.split("=")[1], 10);
+  } else if (arg === "--port" && i + 1 < cliArgs.length) {
+    argPort = parseInt(cliArgs[i + 1], 10);
+    i++; // Skip the next argument since we consumed it
   }
 }
 
@@ -109,8 +120,13 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
       refresh_token: string;
     };
 
+    console.log("\nOAuth Authentication Successful!");
+    console.log("=" .repeat(50));
     console.log("Access Token:", access_token);
     console.log("Refresh Token:", refresh_token);
+    console.log("=" .repeat(50));
+    console.log("You can now use these tokens in your Etsy MCP server configuration.");
+    
     res.send("Authentication successful! You can close this window.");
     readline.close();
     process.exit(0);
@@ -158,8 +174,13 @@ const main = async () => {
 
   const authUrl = `https://www.etsy.com/oauth/connect?response_type=code&client_id=${keystring}&redirect_uri=http://localhost:${port}/oauth/redirect&scope=${scopes}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
 
-  console.log("Opening browser for authentication...");
-  await open(authUrl);
+  try {
+    await open(authUrl);
+  } catch (error) {
+    console.error("Failed to open browser:", error);
+    console.log("Please manually open this URL in your browser:");
+    console.log(authUrl);
+  }
 
   app.listen(port, () => {
     console.log(`Server is listening on http://localhost:${port}`);
@@ -173,9 +194,14 @@ const main = async () => {
 export { app, getEtsyCreds, main };
 
 // Only run automatically when executed directly, not when imported (e.g. by tests)
-const isMain =
-  path.resolve(process.argv[1] || "") === fileURLToPath(import.meta.url);
+const scriptPath = fileURLToPath(import.meta.url);
+const argvPath = path.resolve(process.argv[1] || "");
+const argvPathWithTs = argvPath + ".ts";
+
+const isMain = argvPath === scriptPath || argvPathWithTs === scriptPath;
 
 if (isMain) {
   void main();
+} else {
+  console.log("Not running main - script was imported");
 }
