@@ -112,7 +112,7 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
           "Content-Type": "application/x-www-form-urlencoded",
           "x-api-key": keystring,
         },
-      },
+      }
     );
 
     const { access_token, refresh_token } = tokenResponse.data as {
@@ -125,9 +125,7 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
     console.log("Access Token:", access_token);
     console.log("Refresh Token:", refresh_token);
     console.log("=".repeat(50));
-    console.log(
-      "You can now use these tokens in your Etsy MCP server configuration.",
-    );
+    console.log("You can now use these tokens in your Etsy MCP server configuration.");
 
     res.send("Authentication successful! You can close this window.");
     readline.close();
@@ -139,7 +137,7 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
         ? (error as { response?: { data: unknown } }).response?.data
         : error instanceof Error
           ? error.message
-          : String(error),
+          : String(error)
     );
     res.status(500).send("Failed to get access token.");
     readline.close();
@@ -154,10 +152,7 @@ const main = async () => {
 
   // Generate a PKCE code verifier (43-128 chars) and its SHA256-based code challenge.
   const codeVerifier = crypto.randomBytes(32).toString("base64url");
-  const codeChallenge = crypto
-    .createHash("sha256")
-    .update(codeVerifier)
-    .digest("base64url");
+  const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
 
   (app.locals as AppLocals).codeVerifier = codeVerifier;
 
@@ -187,7 +182,7 @@ const main = async () => {
   app.listen(port, () => {
     console.log(`Server is listening on http://localhost:${port}`);
     console.log(
-      "If you changed the port, ensure this exact callback URL is registered in your Etsy app settings.",
+      "If you changed the port, ensure this exact callback URL is registered in your Etsy app settings."
     );
   });
 };

@@ -93,8 +93,7 @@ export const tools = [
         listing_id: { type: "string", description: "The ID of the listing" },
         image_path: {
           type: "string",
-          description:
-            "Filesystem path to the image file to upload. The file must exist.",
+          description: "Filesystem path to the image file to upload. The file must exist.",
         },
       },
       required: ["shop_id", "listing_id", "image_path"],
@@ -214,23 +213,15 @@ interface UpdateListingInventoryArgs {
   products: unknown[];
 }
 
-export const handlers: Record<
-  string,
-  (args: unknown, axios: AxiosInstance) => Promise<unknown>
-> = {
+export const handlers: Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>> = {
   getListingsByShop: async (args, axios) =>
-    axios.get(
-      `/application/shops/${(args as GetListingsByShopArgs).shop_id}/listings`,
-      {
-        params: { state: (args as GetListingsByShopArgs).state },
-      },
-    ),
+    axios.get(`/application/shops/${(args as GetListingsByShopArgs).shop_id}/listings`, {
+      params: { state: (args as GetListingsByShopArgs).state },
+    }),
 
   createDraftListing: async (args, axios) => {
     const { shop_id, ...rest } = args as CreateDraftListingArgs;
-    const payload = querystring.stringify(
-      rest as Record<string, string | number | boolean>,
-    );
+    const payload = querystring.stringify(rest as Record<string, string | number | boolean>);
     return axios.post(`/application/shops/${shop_id}/listings`, payload, {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
@@ -239,48 +230,31 @@ export const handlers: Record<
   uploadListingImage: async (args, axios) => {
     const { shop_id, listing_id, image_path } = args as UploadListingImageArgs;
     if (!fs.existsSync(image_path)) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        `File not found: ${image_path}`,
-      );
+      throw new McpError(ErrorCode.InvalidRequest, `File not found: ${image_path}`);
     }
     const form = new FormData();
     form.append("image", fs.createReadStream(image_path));
-    return axios.post(
-      `/application/shops/${shop_id}/listings/${listing_id}/images`,
-      form,
-      { headers: form.getHeaders() },
-    );
+    return axios.post(`/application/shops/${shop_id}/listings/${listing_id}/images`, form, {
+      headers: form.getHeaders(),
+    });
   },
 
   updateListing: async (args, axios) => {
     const { shop_id, listing_id, ...rest } = args as UpdateListingArgs;
-    const payload = querystring.stringify(
-      rest as Record<string, string | number | boolean>,
-    );
-    return axios.put(
-      `/application/shops/${shop_id}/listings/${listing_id}`,
-      payload,
-      {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      },
-    );
+    const payload = querystring.stringify(rest as Record<string, string | number | boolean>);
+    return axios.put(`/application/shops/${shop_id}/listings/${listing_id}`, payload, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
   },
 
   getListingImages: async (args, axios) =>
-    axios.get(
-      `/application/listings/${(args as GetListingImagesArgs).listing_id}/images`,
-    ),
+    axios.get(`/application/listings/${(args as GetListingImagesArgs).listing_id}/images`),
 
   getListingFiles: async (args, axios) =>
-    axios.get(
-      `/application/listings/${(args as GetListingFilesArgs).listing_id}/files`,
-    ),
+    axios.get(`/application/listings/${(args as GetListingFilesArgs).listing_id}/files`),
 
   getListingInventory: async (args, axios) =>
-    axios.get(
-      `/application/listings/${(args as GetListingInventoryArgs).listing_id}/inventory`,
-    ),
+    axios.get(`/application/listings/${(args as GetListingInventoryArgs).listing_id}/inventory`),
 
   updateListingInventory: async (args, axios) => {
     const { listing_id, products } = args as UpdateListingInventoryArgs;

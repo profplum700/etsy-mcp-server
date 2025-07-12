@@ -38,7 +38,7 @@ export function loadEtsyConfig(): EtsyConfig {
   // 3. Validate that we now have all required configuration pieces
   if (!apiKey || !sharedSecret || !refreshToken) {
     throw new Error(
-      "ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required",
+      "ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required"
     );
   }
 

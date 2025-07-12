@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { loadEtsyConfig } from '../src/config.js';
+import fs from 'fs';
+import path from 'path';
 
 // Mock environment variables for testing
 const originalEnv = { ...process.env };
@@ -40,6 +42,13 @@ describe('EtsyServer Integration Tests', () => {
       delete process.env.ETSY_API_KEY;
       delete process.env.ETSY_SHARED_SECRET;
       delete process.env.ETSY_REFRESH_TOKEN;
+
+      // Ensure no settings file exists for this test
+      const settingsPath = path.join(__dirname, "..", "etsy_mcp_settings.json");
+      const settingsExisted = fs.existsSync(settingsPath);
+      if (settingsExisted) {
+        fs.unlinkSync(settingsPath);
+      }
 
       expect(() => loadEtsyConfig()).toThrow(
         'ETSY_API_KEY, ETSY_SHARED_SECRET, and ETSY_REFRESH_TOKEN environment variables are required'

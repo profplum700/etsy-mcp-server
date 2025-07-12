@@ -42,15 +42,9 @@ export const tools = [
   },
 ];
 
-export const handlers: Record<
-  string,
-  (args: unknown, axios: AxiosInstance) => Promise<unknown>
-> = {
+export const handlers: Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>> = {
   getMe: async (_, axios) => axios.get("/application/users/me"),
-  getShop: async (args, axios) =>
-    axios.get(`/application/shops/${(args as GetShopArgs).shop_id}`),
+  getShop: async (args, axios) => axios.get(`/application/shops/${(args as GetShopArgs).shop_id}`),
   getShopSections: async (args, axios) =>
-    axios.get(
-      `/application/shops/${(args as GetShopSectionArgs).shop_id}/sections`,
-    ),
+    axios.get(`/application/shops/${(args as GetShopSectionArgs).shop_id}/sections`),
 };

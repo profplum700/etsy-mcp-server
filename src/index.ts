@@ -8,14 +8,8 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import {
-  tools as shopTools,
-  handlers as shopHandlers,
-} from "./handlers/shop.js";
-import {
-  tools as listingTools,
-  handlers as listingHandlers,
-} from "./handlers/listing.js";
+import { tools as shopTools, handlers as shopHandlers } from "./handlers/shop.js";
+import { tools as listingTools, handlers as listingHandlers } from "./handlers/listing.js";
 import {
   tools as sellerTaxonomyTools,
   handlers as sellerTaxonomyHandlers,
@@ -40,7 +34,7 @@ class EtsyServer {
           resources: {},
           tools: {},
         },
-      },
+      }
     );
 
     this.axiosInstance = axios.create({
@@ -58,19 +52,14 @@ class EtsyServer {
 
   private async refreshAccessToken() {
     try {
-      const response = await axios.post(
-        "https://api.etsy.com/v3/public/oauth/token",
-        {
-          grant_type: "refresh_token",
-          client_id: API_KEY,
-          refresh_token: REFRESH_TOKEN,
-        },
-      );
+      const response = await axios.post("https://api.etsy.com/v3/public/oauth/token", {
+        grant_type: "refresh_token",
+        client_id: API_KEY,
+        refresh_token: REFRESH_TOKEN,
+      });
       this.accessToken = response.data.access_token;
-      this.axiosInstance.defaults.headers.common["Authorization"] =
-        `Bearer ${this.accessToken}`;
-      this.axiosInstance.defaults.headers.common["x-api-key"] =
-        API_KEY as string;
+      this.axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${this.accessToken}`;
+      this.axiosInstance.defaults.headers.common["x-api-key"] = API_KEY as string;
     } catch (error: unknown) {
       console.error(
         "Error refreshing access token:",
@@ -78,12 +67,9 @@ class EtsyServer {
           ? (error as { response?: { data: unknown } }).response?.data
           : error instanceof Error
             ? error.message
-            : String(error),
+            : String(error)
       );
-      throw new McpError(
-        ErrorCode.InternalError,
-        "Failed to refresh Etsy access token",
-      );
+      throw new McpError(ErrorCode.InternalError, "Failed to refresh Etsy access token");
     }
   }
 
@@ -99,10 +85,7 @@ class EtsyServer {
       ...shopHandlers,
       ...listingHandlers,
       ...sellerTaxonomyHandlers,
-    } as Record<
-      string,
-      (args: unknown, axios: AxiosInstance) => Promise<unknown>
-    >;
+    } as Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>>;
 
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: allTools,
@@ -116,15 +99,9 @@ class EtsyServer {
       try {
         const handler = handlers[request.params.name];
         if (!handler) {
-          throw new McpError(
-            ErrorCode.MethodNotFound,
-            `Unknown tool: ${request.params.name}`,
-          );
+          throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
         }
-        const response = await handler(
-          request.params.arguments,
-          this.axiosInstance,
-        );
+        const response = await handler(request.params.arguments, this.axiosInstance);
         return {
           content: [
             {

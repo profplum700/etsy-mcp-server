@@ -26,15 +26,11 @@ export const tools = [
   },
 ];
 
-export const handlers: Record<
-  string,
-  (args: unknown, axios: AxiosInstance) => Promise<unknown>
-> = {
-  getSellerTaxonomyNodes: async (_, axios) =>
-    axios.get("/application/seller-taxonomy/nodes"),
+export const handlers: Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>> = {
+  getSellerTaxonomyNodes: async (_, axios) => axios.get("/application/seller-taxonomy/nodes"),
 
   getPropertiesByTaxonomyId: async (args, axios) =>
     axios.get(
-      `/application/seller-taxonomy/nodes/${(args as GetPropertiesByTaxonomyIdArgs).taxonomy_id}/properties`,
+      `/application/seller-taxonomy/nodes/${(args as GetPropertiesByTaxonomyIdArgs).taxonomy_id}/properties`
     ),
 };
