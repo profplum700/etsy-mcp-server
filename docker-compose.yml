@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  etsy-mcp-server:
+    build: .
+    image: etsy-mcp-server:latest
+    environment:
+      - ETSY_API_KEY=${ETSY_API_KEY}
+      - ETSY_SHARED_SECRET=${ETSY_SHARED_SECRET}
+      - ETSY_REFRESH_TOKEN=${ETSY_REFRESH_TOKEN}
+    # Alternative: use a settings file instead of environment variables
+    # volumes:
+    #   - ./etsy_mcp_settings.json:/usr/src/app/etsy_mcp_settings.json:ro
+    stdin_open: true
+    tty: true
+    restart: 'no'  # MCP servers should not auto-restart
+    profiles:
+      - production

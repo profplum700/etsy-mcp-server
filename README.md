@@ -63,10 +63,18 @@ The server will be started automatically by the MCP client when needed.
 
 This is the recommended method for deployment or for running the server in a standardized environment.
 
-First, build the Docker image from the repository root:
+### Quick Start with Docker
+
+**Option 1: Build Locally**
 
 ```bash
 docker build -t etsy-mcp-server .
+```
+
+**Option 2: Pull from Registry** (when available)
+
+```bash
+# Future: docker pull etsy-mcp-server:latest
 ```
 
 ### Configuration File Location for Docker
@@ -152,6 +160,65 @@ Example MCP client configuration:
 ```
 
 The MCP client will automatically start the container when it needs to use the Etsy tools and stop it when done.
+
+### Docker Compose (Recommended)
+
+For easier management, use Docker Compose:
+
+1. Copy `.env.example` to `.env` and fill in your credentials:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Etsy API credentials
+   ```
+
+2. Start with Docker Compose:
+   ```bash
+   docker-compose --profile production up
+   ```
+
+### Production Deployment
+
+**Multi-platform Builds** (for ARM64/Apple Silicon):
+
+```bash
+# Build for multiple architectures
+docker buildx build --platform linux/amd64,linux/arm64 -t etsy-mcp-server:latest .
+
+# Or build specifically for ARM64 (Apple Silicon)
+docker buildx build --platform linux/arm64 -t etsy-mcp-server:arm64 .
+```
+
+**Registry Deployment**:
+
+```bash
+# Tag for registry
+docker tag etsy-mcp-server:latest your-registry.com/etsy-mcp-server:1.0.0
+
+# Push to registry
+docker push your-registry.com/etsy-mcp-server:1.0.0
+```
+
+### Docker Troubleshooting
+
+**Common Issues:**
+
+1. **Container exits immediately**: This is normal behavior for MCP servers when no client connects
+2. **Permission denied**: Ensure Docker has proper file system access
+3. **Settings file not found**: Check volume mount path matches your file location
+4. **Environment variables not loaded**: Verify `.env` file syntax and variable names
+
+**Debug Commands:**
+
+```bash
+# Check container logs
+docker logs etsy-mcp-server
+
+# Run container interactively for debugging
+docker run -it --rm etsy-mcp-server sh
+
+# Test container with manual input
+echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | docker run -i --rm etsy-mcp-server
+```
 
 ## Available tools
 
