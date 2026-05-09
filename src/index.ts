@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { fileURLToPath } from "url";
+import path from "path";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -7,7 +9,6 @@ import {
   ListToolsRequestSchema,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
-import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { tools as shopTools, handlers as shopHandlers } from "./handlers/shop.js";
 import { tools as listingTools, handlers as listingHandlers } from "./handlers/listing.js";
 import {
@@ -15,15 +16,29 @@ import {
   handlers as sellerTaxonomyHandlers,
 } from "./handlers/seller-taxonomy.js";
 import { loadEtsyConfig } from "./config.js";
+import {
+  createEtsyApiClient,
+  formatEtsyFailure,
+  type EtsyMcpApiClient,
+} from "./etsy-api-client.js";
 
-const { apiKey: API_KEY, refreshToken: REFRESH_TOKEN } = loadEtsyConfig();
+export type ToolHandler = (args: unknown, client: EtsyMcpApiClient) => Promise<unknown>;
 
-class EtsyServer {
+export interface EtsyServerOptions {
+  apiClient?: EtsyMcpApiClient;
+}
+
+function createConfiguredApiClient(): EtsyMcpApiClient {
+  const { apiKey, sharedSecret, refreshToken } = loadEtsyConfig();
+  return createEtsyApiClient({ apiKey, sharedSecret, refreshToken });
+}
+
+export class EtsyServer {
   private server: Server;
-  private axiosInstance: AxiosInstance;
-  private accessToken: string | null = null;
+  private etsyClient: EtsyMcpApiClient;
+  private handlers: Record<string, ToolHandler>;
 
-  constructor() {
+  constructor(options: EtsyServerOptions = {}) {
     this.server = new Server(
       {
         name: "etsy-mcp-server",
@@ -37,9 +52,12 @@ class EtsyServer {
       }
     );
 
-    this.axiosInstance = axios.create({
-      baseURL: "https://api.etsy.com/v3",
-    });
+    this.etsyClient = options.apiClient ?? createConfiguredApiClient();
+    this.handlers = {
+      ...shopHandlers,
+      ...listingHandlers,
+      ...sellerTaxonomyHandlers,
+    };
 
     this.setupToolHandlers();
 
@@ -50,90 +68,53 @@ class EtsyServer {
     });
   }
 
-  private async refreshAccessToken() {
-    try {
-      const response = await axios.post("https://api.etsy.com/v3/public/oauth/token", {
-        grant_type: "refresh_token",
-        client_id: API_KEY,
-        refresh_token: REFRESH_TOKEN,
-      });
-      this.accessToken = response.data.access_token;
-      this.axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${this.accessToken}`;
-      this.axiosInstance.defaults.headers.common["x-api-key"] = API_KEY as string;
-    } catch (error: unknown) {
-      console.error(
-        "Error refreshing access token:",
-        error instanceof Error && "response" in error
-          ? (error as { response?: { data: unknown } }).response?.data
-          : error instanceof Error
-            ? error.message
-            : String(error)
-      );
-      throw new McpError(ErrorCode.InternalError, "Failed to refresh Etsy access token");
-    }
+  async listTools() {
+    return [...shopTools, ...listingTools, ...sellerTaxonomyTools];
   }
 
-  private async ensureAccessToken() {
-    if (!this.accessToken) {
-      await this.refreshAccessToken();
+  async callTool(name: string, args: unknown) {
+    if (!args) {
+      throw new McpError(ErrorCode.InvalidRequest, "Arguments are required");
+    }
+
+    const handler = this.handlers[name];
+    if (!handler) {
+      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+    }
+
+    try {
+      const response = await handler(args, this.etsyClient);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatEtsyFailure(error),
+          },
+        ],
+        isError: true,
+      };
     }
   }
 
   private setupToolHandlers() {
-    const allTools = [...shopTools, ...listingTools, ...sellerTaxonomyTools];
-    const handlers = {
-      ...shopHandlers,
-      ...listingHandlers,
-      ...sellerTaxonomyHandlers,
-    } as Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>>;
-
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
-      tools: allTools,
+      tools: await this.listTools(),
     }));
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      await this.ensureAccessToken();
-      if (!request.params.arguments) {
-        throw new McpError(ErrorCode.InvalidRequest, "Arguments are required");
-      }
-      try {
-        const handler = handlers[request.params.name];
-        if (!handler) {
-          throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
-        }
-        const response = await handler(request.params.arguments, this.axiosInstance);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify((response as AxiosResponse).data, null, 2),
-            },
-          ],
-        };
-      } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Etsy API error: ${error.response?.data.message ?? error.message}`,
-              },
-            ],
-            isError: true,
-          };
-        }
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    });
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) =>
+      this.callTool(request.params.name, request.params.arguments)
+    );
   }
+
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
@@ -141,5 +122,15 @@ class EtsyServer {
   }
 }
 
-const server = new EtsyServer();
-server.run().catch(console.error);
+const scriptPath = fileURLToPath(import.meta.url);
+const argvPath = path.resolve(process.argv[1] || "");
+const argvPathWithTs = argvPath + ".ts";
+const isMain = argvPath === scriptPath || argvPathWithTs === scriptPath;
+
+if (isMain) {
+  const server = new EtsyServer();
+  server.run().catch((error) => {
+    console.error("Failed to start Etsy MCP server", formatEtsyFailure(error));
+    process.exit(1);
+  });
+}

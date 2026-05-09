@@ -1,9 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import axios from 'axios';
-
-// Mock axios
-vi.mock('axios');
-const mockedAxios = vi.mocked(axios);
 
 describe('get-refresh-token module', () => {
   const originalArgv = process.argv;
@@ -19,7 +14,6 @@ describe('get-refresh-token module', () => {
     process.argv = originalArgv;
     consoleSpy.mockRestore();
     consoleErrorSpy.mockRestore();
-    vi.clearAllMocks();
   });
 
   describe('CLI argument parsing', () => {

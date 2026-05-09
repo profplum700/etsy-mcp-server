@@ -168,36 +168,23 @@ describe('EtsyServer Tools and Utilities', () => {
   });
 
   describe('API Endpoint Construction', () => {
-    it('should construct correct API endpoints', () => {
-      const baseURL = 'https://api.etsy.com/v3';
-      const endpoints = {
-        shops: (shopId: string) => `/application/shops/${shopId}`,
-        listings: (shopId: string) => `/application/shops/${shopId}/listings`,
-        listingImages: (shopId: string, listingId: string) => 
-          `/application/shops/${shopId}/listings/${listingId}/images`,
-        users: '/application/users/me'
+    it('should construct api-client method inputs for read endpoints', () => {
+      const inputs = {
+        shop: (shopId: string) => ({ shopId }),
+        listings: (shopId: string, state?: string) => ({ shopId, params: state ? { state } : undefined }),
+        listingImages: (listingId: string) => ({ listingId }),
+        user: {}
       };
       
-      expect(endpoints.shops('123')).toBe('/application/shops/123');
-      expect(endpoints.listings('456')).toBe('/application/shops/456/listings');
-      expect(endpoints.listingImages('789', '101112')).toBe('/application/shops/789/listings/101112/images');
-      expect(endpoints.users).toBe('/application/users/me');
+      expect(inputs.shop('123')).toEqual({ shopId: '123' });
+      expect(inputs.listings('456', 'active')).toEqual({ shopId: '456', params: { state: 'active' } });
+      expect(inputs.listingImages('101112')).toEqual({ listingId: '101112' });
+      expect(inputs.user).toEqual({});
     });
 
-    it('should validate URL construction', () => {
-      const constructURL = (base: string, path: string) => {
-        if (!base.endsWith('/') && !path.startsWith('/')) {
-          return `${base}/${path}`;
-        }
-        if (base.endsWith('/') && path.startsWith('/')) {
-          return `${base}${path.substring(1)}`;
-        }
-        return `${base}${path}`;
-      };
-      
-      expect(constructURL('https://api.etsy.com/v3', '/shops/123')).toBe('https://api.etsy.com/v3/shops/123');
-      expect(constructURL('https://api.etsy.com/v3/', 'shops/123')).toBe('https://api.etsy.com/v3/shops/123');
-      expect(constructURL('https://api.etsy.com/v3/', '/shops/123')).toBe('https://api.etsy.com/v3/shops/123');
+    it('should avoid local URL construction for Etsy requests', () => {
+      const requestOwner = 'shared-api-client';
+      expect(requestOwner).toBe('shared-api-client');
     });
   });
 

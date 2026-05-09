@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import type { EtsyMcpApiClient } from "../etsy-api-client.js";
 
 interface GetPropertiesByTaxonomyIdArgs {
   taxonomy_id: string;
@@ -26,11 +26,12 @@ export const tools = [
   },
 ];
 
-export const handlers: Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>> = {
-  getSellerTaxonomyNodes: async (_, axios) => axios.get("/application/seller-taxonomy/nodes"),
+export const handlers: Record<
+  string,
+  (args: unknown, client: EtsyMcpApiClient) => Promise<unknown>
+> = {
+  getSellerTaxonomyNodes: async (_, client) => client.getSellerTaxonomyNodes(),
 
-  getPropertiesByTaxonomyId: async (args, axios) =>
-    axios.get(
-      `/application/seller-taxonomy/nodes/${(args as GetPropertiesByTaxonomyIdArgs).taxonomy_id}/properties`
-    ),
+  getPropertiesByTaxonomyId: async (args, client) =>
+    client.getPropertiesByTaxonomyId((args as GetPropertiesByTaxonomyIdArgs).taxonomy_id),
 };

@@ -1,5 +1,4 @@
-import axios from "axios";
-import * as crypto from "crypto";
+import { AuthHelper } from "@profplum700/etsy-v3-api-client";
 import express, { Request, Response } from "express";
 import open from "open";
 import path from "path";
@@ -47,8 +46,7 @@ const readline = createInterface({
 interface AppLocals {
   keystring: string;
   sharedSecret: string;
-  codeVerifier: string;
-  state: string;
+  authHelper: AuthHelper;
 }
 
 interface EtsyCreds {
@@ -88,8 +86,8 @@ const getEtsyCreds = (): Promise<EtsyCreds> => {
 
 app.get("/oauth/redirect", async (req: Request, res: Response) => {
   console.log("Redirect received with query:", req.query);
-  const { code } = req.query as { code?: string };
-  const { keystring } = app.locals as AppLocals;
+  const { code, state } = req.query as { code?: string; state?: string };
+  const { authHelper } = app.locals as AppLocals;
 
   if (!code) {
     res.status(400).send("Authorization code is missing.");
@@ -97,28 +95,8 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
   }
 
   try {
-    const params = new URLSearchParams();
-    params.append("grant_type", "authorization_code");
-    params.append("client_id", keystring);
-    params.append("redirect_uri", `http://localhost:${port}/oauth/redirect`);
-    params.append("code", code as string);
-    params.append("code_verifier", (app.locals as AppLocals).codeVerifier);
-
-    const tokenResponse = await axios.post(
-      "https://api.etsy.com/v3/public/oauth/token",
-      params.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "x-api-key": keystring,
-        },
-      }
-    );
-
-    const { access_token, refresh_token } = tokenResponse.data as {
-      access_token: string;
-      refresh_token: string;
-    };
+    await authHelper.setAuthorizationCode(code, state || (await authHelper.getState()));
+    const { access_token, refresh_token } = await authHelper.getAccessToken();
 
     console.log("\nOAuth Authentication Successful!");
     console.log("=".repeat(50));
@@ -133,11 +111,7 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
   } catch (error: unknown) {
     console.error(
       "Error exchanging authorization code for access token:",
-      error instanceof Error && "response" in error
-        ? (error as { response?: { data: unknown } }).response?.data
-        : error instanceof Error
-          ? error.message
-          : String(error)
+      error instanceof Error ? error.message : String(error)
     );
     res.status(500).send("Failed to get access token.");
     readline.close();
@@ -146,30 +120,16 @@ app.get("/oauth/redirect", async (req: Request, res: Response) => {
 });
 
 const main = async () => {
-  const { keystring, sharedSecret } = await getEtsyCreds();
+  const { keystring } = await getEtsyCreds();
+  const authHelper = new AuthHelper({
+    keystring,
+    redirectUri: `http://localhost:${port}/oauth/redirect`,
+    scopes: ["listings_r", "shops_r", "transactions_r"],
+  });
   (app.locals as AppLocals).keystring = keystring;
-  (app.locals as AppLocals).sharedSecret = sharedSecret;
+  (app.locals as AppLocals).authHelper = authHelper;
 
-  // Generate a PKCE code verifier (43-128 chars) and its SHA256-based code challenge.
-  const codeVerifier = crypto.randomBytes(32).toString("base64url");
-  const codeChallenge = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
-
-  (app.locals as AppLocals).codeVerifier = codeVerifier;
-
-  const scopes = [
-    "listings_r",
-    "listings_w",
-    "shops_r",
-    "shops_w",
-    "transactions_r",
-    "transactions_w",
-  ].join(" ");
-
-  // Etsy requires a unique `state` param in the authorization request.
-  const state = Math.random().toString(36).substring(2, 15);
-  (app.locals as AppLocals).state = state;
-
-  const authUrl = `https://www.etsy.com/oauth/connect?response_type=code&client_id=${keystring}&redirect_uri=http://localhost:${port}/oauth/redirect&scope=${scopes}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+  const authUrl = await authHelper.getAuthUrl();
 
   try {
     await open(authUrl);

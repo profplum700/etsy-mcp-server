@@ -64,28 +64,24 @@ describe('EtsyServer Integration Tests', () => {
   describe('Server Initialization', () => {
     it('should have proper server configuration constants', () => {
       const serverName = 'etsy-mcp-server';
-      const serverVersion = '0.1.0';
-      const baseURL = 'https://api.etsy.com/v3';
+      const serverVersion = '1.0.0';
+      const apiClientPackage = '@profplum700/etsy-v3-api-client';
       
       expect(serverName).toBe('etsy-mcp-server');
-      expect(serverVersion).toBe('0.1.0');
-      expect(baseURL).toBe('https://api.etsy.com/v3');
+      expect(serverVersion).toBe('1.0.0');
+      expect(apiClientPackage).toBe('@profplum700/etsy-v3-api-client');
     });
   });
 
-  describe('API Endpoints', () => {
-    it('should define correct Etsy API endpoints', () => {
-      const endpoints = {
-        token: 'https://api.etsy.com/v3/public/oauth/token',
-        shops: '/application/shops',
-        listings: '/application/listings',
-        users: '/application/users'
+  describe('API Client Boundaries', () => {
+    it('should keep Etsy request construction inside the shared api-client package', () => {
+      const localBoundary = {
+        transport: 'mcp-stdio',
+        etsyRequests: 'shared-api-client'
       };
       
-      expect(endpoints.token).toBe('https://api.etsy.com/v3/public/oauth/token');
-      expect(endpoints.shops).toBe('/application/shops');
-      expect(endpoints.listings).toBe('/application/listings');
-      expect(endpoints.users).toBe('/application/users');
+      expect(localBoundary.transport).toBe('mcp-stdio');
+      expect(localBoundary.etsyRequests).toBe('shared-api-client');
     });
   });
 

@@ -238,31 +238,11 @@ Return basic info about the authenticated user, including `user_id` and
 
 List the listings in a shop. Supports an optional `state` parameter (e.g. `active`, `draft`). Requires `shop_id`.
 
-### `createDraftListing`
-
-Create a new physical draft listing using `POST /v3/application/shops/{shop_id}/listings`.
-The tool accepts all fields supported by Etsy's `createDraftListing` endpoint.
-
-### `uploadListingImage`
-
-Upload an image to a listing. Requires `shop_id`, `listing_id` and `image_path`.
-(Implementation is currently a placeholder.)
-
-### `updateListing`
-
-Update an existing listing. Requires `shop_id` and `listing_id`. Optional fields include `title`, `description` and `price`.
-
-### `getShopReceipts`
-
-Retrieve receipts for a shop. Requires `shop_id`.
+The V1 MCP surface is read-only. Listing creation, image upload, listing updates, and inventory update tools are intentionally not exposed.
 
 ### `getShopSections`
 
 Retrieve the list of sections in a shop. Requires `shop_id`.
-
-### `getShopSection`
-
-Retrieve a single shop section by `shop_id` and `shop_section_id`.
 
 ### `getSellerTaxonomyNodes`
 

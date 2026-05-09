@@ -1,4 +1,4 @@
-import { AxiosInstance } from "axios";
+import type { EtsyMcpApiClient } from "../etsy-api-client.js";
 
 interface GetShopArgs {
   shop_id: string;
@@ -6,7 +6,6 @@ interface GetShopArgs {
 
 interface GetShopSectionArgs {
   shop_id: string;
-  shop_section_id: string;
 }
 
 export const tools = [
@@ -42,9 +41,12 @@ export const tools = [
   },
 ];
 
-export const handlers: Record<string, (args: unknown, axios: AxiosInstance) => Promise<unknown>> = {
-  getMe: async (_, axios) => axios.get("/application/users/me"),
-  getShop: async (args, axios) => axios.get(`/application/shops/${(args as GetShopArgs).shop_id}`),
-  getShopSections: async (args, axios) =>
-    axios.get(`/application/shops/${(args as GetShopSectionArgs).shop_id}/sections`),
+export const handlers: Record<
+  string,
+  (args: unknown, client: EtsyMcpApiClient) => Promise<unknown>
+> = {
+  getMe: async (_, client) => client.getMe(),
+  getShop: async (args, client) => client.getShop((args as GetShopArgs).shop_id),
+  getShopSections: async (args, client) =>
+    client.getShopSections((args as GetShopSectionArgs).shop_id),
 };
