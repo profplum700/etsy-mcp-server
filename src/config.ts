@@ -8,6 +8,13 @@ export interface EtsyConfig {
   refreshToken: string;
 }
 
+function resolveSettingsPath(): string {
+  return (
+    process.env.ETSY_MCP_SETTINGS_PATH ||
+    path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "etsy_mcp_settings.json")
+  );
+}
+
 export function loadEtsyConfig(): EtsyConfig {
   // 1. Prefer values supplied via environment variables
   let apiKey: string | undefined = process.env.ETSY_API_KEY;
@@ -17,8 +24,7 @@ export function loadEtsyConfig(): EtsyConfig {
   // 2. When any value is missing, attempt to read from the optional settings file
   if (!apiKey || !sharedSecret || !refreshToken) {
     try {
-      const __dirname = path.dirname(fileURLToPath(import.meta.url));
-      const settingsPath = path.join(__dirname, "..", "etsy_mcp_settings.json");
+      const settingsPath = resolveSettingsPath();
       if (fs.existsSync(settingsPath)) {
         const raw = fs.readFileSync(settingsPath, "utf-8");
         const cfg = JSON.parse(raw)["etsy-mcp-server"] ?? {};
@@ -26,9 +32,6 @@ export function loadEtsyConfig(): EtsyConfig {
         apiKey = apiKey || cfg.keystring;
         sharedSecret = sharedSecret || cfg.sharedSecret;
         refreshToken = refreshToken || cfg.refreshToken;
-        if (process.env.NODE_ENV === "test") {
-          fs.unlinkSync(settingsPath);
-        }
       }
     } catch {
       // The file is optional – ignore if it is missing or malformed
