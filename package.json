@@ -21,7 +21,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@profplum700/etsy-v3-api-client": "^3.0.0",
     "express": "^5.1.0",
     "open": "^10.1.2"

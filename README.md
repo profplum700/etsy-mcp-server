@@ -61,6 +61,27 @@ To use this server with an MCP client, you typically need to:
 
 The server will be started automatically by the MCP client when needed.
 
+## Cloudflare Worker Streamable HTTP
+
+The existing `npm start` path remains a stdio MCP server for local development and desktop MCP clients. A Worker-compatible Streamable HTTP entrypoint is also available at `src/worker.ts` for runtimes that support the Web Standard `Request`/`Response` APIs.
+
+The Worker exposes:
+
+- `POST /mcp` for MCP Streamable HTTP JSON-RPC requests
+- `GET /mcp` for Streamable HTTP SSE streams when clients request `text/event-stream`
+- `DELETE /mcp` for Streamable HTTP session termination requests
+- `GET /healthz` for a generic non-secret health probe
+
+To prepare a Worker build:
+
+```bash
+npm run build
+cp wrangler.toml.example wrangler.toml
+# Fill generic Etsy credentials with Wrangler secrets or environment-specific vars.
+```
+
+`wrangler.toml.example` contains only placeholders. Do not commit real Etsy credentials or deployment-specific hostnames.
+
 ## Running with Docker
 
 This is the recommended self-hosting method for running the server in a standardized environment.
