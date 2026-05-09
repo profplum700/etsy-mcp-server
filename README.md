@@ -1,6 +1,8 @@
 # Etsy MCP Server
 
-This project exposes a subset of the [Etsy API](https://developers.etsy.com/) through the Model Context Protocol. It allows tools to be called from an MCP client to retrieve shop data and manage listings.
+This project is a generic, self-hosted [Model Context Protocol](https://modelcontextprotocol.io/) server for the [Etsy API](https://developers.etsy.com/). It lets MCP clients retrieve shop data and manage listings for any Etsy app credentials you provide at runtime.
+
+The repository intentionally contains only generic examples and placeholders. Put shop-specific credentials, hostnames, and deployment details in your own environment variables, local settings file, or deployment platform configuration.
 
 ## OAuth Setup
 
@@ -61,7 +63,7 @@ The server will be started automatically by the MCP client when needed.
 
 ## Running with Docker
 
-This is the recommended method for deployment or for running the server in a standardized environment.
+This is the recommended self-hosting method for running the server in a standardized environment.
 
 ### Quick Start with Docker
 
@@ -176,7 +178,7 @@ For easier management, use Docker Compose:
    docker-compose --profile production up
    ```
 
-### Production Deployment
+### Self-hosted Deployment
 
 **Multi-platform Builds** (for ARM64/Apple Silicon):
 
