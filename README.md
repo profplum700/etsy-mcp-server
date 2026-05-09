@@ -72,12 +72,14 @@ The Worker exposes:
 - `DELETE /mcp` for Streamable HTTP session termination requests
 - `GET /healthz` for a generic non-secret health probe
 
+`/mcp` requires `Authorization: Bearer <token>` and compares the presented token with the `MCP_BEARER` Worker secret binding before creating the MCP server or running any tool handler. `GET /healthz` remains public and unauthenticated.
+
 To prepare a Worker build:
 
 ```bash
 npm run build
 cp wrangler.toml.example wrangler.toml
-# Fill generic Etsy credentials with Wrangler secrets or environment-specific vars.
+# Configure MCP_BEARER and Etsy credentials with Wrangler secrets or environment-specific vars.
 ```
 
 `wrangler.toml.example` contains only placeholders. Do not commit real Etsy credentials or deployment-specific hostnames.
@@ -122,6 +124,7 @@ You can supply your Etsy credentials either as environment variables or by mount
 **Option 1: Using Environment Variables**
 
 **Bash:**
+
 ```bash
 docker run --rm \
   -e ETSY_API_KEY=YOUR_KEY \
@@ -131,6 +134,7 @@ docker run --rm \
 ```
 
 **PowerShell:**
+
 ```powershell
 docker run --rm `
   -e ETSY_API_KEY=YOUR_KEY `
@@ -189,6 +193,7 @@ The MCP client will automatically start the container when it needs to use the E
 For easier management, use Docker Compose:
 
 1. Copy `.env.example` to `.env` and fill in your credentials:
+
    ```bash
    cp .env.example .env
    # Edit .env with your Etsy API credentials

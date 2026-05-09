@@ -9,7 +9,10 @@ ETSY_API_KEY = "replace-with-your-etsy-api-keystring"
 ETSY_SHARED_SECRET = "replace-with-your-etsy-shared-secret"
 ETSY_REFRESH_TOKEN = "replace-with-your-oauth-refresh-token"
 
+# MCP_BEARER is intentionally not listed under [vars]. Configure it as a secret binding.
+
 # Prefer Wrangler secrets for real deployments instead of committing values:
+# wrangler secret put MCP_BEARER
 # wrangler secret put ETSY_API_KEY
 # wrangler secret put ETSY_SHARED_SECRET
 # wrangler secret put ETSY_REFRESH_TOKEN

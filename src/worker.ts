@@ -24,6 +24,7 @@ export interface WorkerEnv {
   ETSY_SHARED_SECRET?: string;
   ETSY_REFRESH_TOKEN?: string;
   MCP_ENDPOINT?: string;
+  MCP_BEARER?: string;
 }
 
 const DEFAULT_MCP_ENDPOINT = "/mcp";
@@ -102,6 +103,52 @@ function createWorkerServer(apiClient: EtsyMcpApiClient): Server {
   return server;
 }
 
+function unauthorized(): Response {
+  return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    status: 401,
+    headers: jsonHeaders,
+  });
+}
+
+function constantTimeEqual(left: string, right: string): boolean {
+  const encoder = new TextEncoder();
+  const leftBytes = encoder.encode(left);
+  const rightBytes = encoder.encode(right);
+  const maxLength = Math.max(leftBytes.length, rightBytes.length);
+  let diff = leftBytes.length ^ rightBytes.length;
+
+  for (let index = 0; index < maxLength; index++) {
+    diff |= (leftBytes[index] ?? 0) ^ (rightBytes[index] ?? 0);
+  }
+
+  return diff === 0;
+}
+
+function getBearerToken(request: Request): string | null {
+  const authorization = request.headers.get("authorization");
+  if (!authorization) {
+    return null;
+  }
+
+  const [scheme, token, extra] = authorization.trim().split(/\s+/);
+  if (scheme !== "Bearer" || !token || extra) {
+    return null;
+  }
+
+  return token;
+}
+
+function isAuthorizedMcpRequest(request: Request, env: WorkerEnv): boolean {
+  const expectedBearer = env.MCP_BEARER;
+  const presentedBearer = getBearerToken(request);
+
+  if (!expectedBearer || !presentedBearer) {
+    return false;
+  }
+
+  return constantTimeEqual(presentedBearer, expectedBearer);
+}
+
 function notFound(): Response {
   return new Response(JSON.stringify({ error: "Not found" }), {
     status: 404,
@@ -131,6 +178,10 @@ export async function handleWorkerRequest(request: Request, env: WorkerEnv): Pro
 
   if (url.pathname !== mcpEndpoint) {
     return notFound();
+  }
+
+  if (!isAuthorizedMcpRequest(request, env)) {
+    return unauthorized();
   }
 
   const apiClient = createWorkerApiClient(env);
