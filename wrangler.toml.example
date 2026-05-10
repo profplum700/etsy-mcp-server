@@ -16,3 +16,15 @@ ETSY_REFRESH_TOKEN = "replace-with-your-oauth-refresh-token"
 # wrangler secret put ETSY_API_KEY
 # wrangler secret put ETSY_SHARED_SECRET
 # wrangler secret put ETSY_REFRESH_TOKEN
+
+# Optional advanced token-vault mode:
+# Bind a Durable Object only if your Worker entrypoint wires the api-client
+# TokenVaultClient/DurableObjectTokenVault as its TokenProvider. The checked-in
+# generic Worker uses ETSY_REFRESH_TOKEN directly.
+# [[durable_objects.bindings]]
+# name = "ETSY_TOKEN_VAULT"
+# class_name = "DurableObjectTokenVault"
+#
+# [[migrations]]
+# tag = "v1-token-vault"
+# new_sqlite_classes = ["DurableObjectTokenVault"]

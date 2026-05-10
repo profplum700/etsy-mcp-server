@@ -84,6 +84,8 @@ cp wrangler.toml.example wrangler.toml
 
 `wrangler.toml.example` contains only placeholders. Do not commit real Etsy credentials or deployment-specific hostnames.
 
+For the full generic Worker deployment, bearer rotation, Durable Object token-vault, OAuth consent, smoke-test, and rollback procedure, see [`docs/worker-deployment-oauth.md`](docs/worker-deployment-oauth.md).
+
 ## Running with Docker
 
 This is the recommended self-hosting method for running the server in a standardized environment.
