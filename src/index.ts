@@ -15,6 +15,7 @@ import {
   tools as sellerTaxonomyTools,
   handlers as sellerTaxonomyHandlers,
 } from "./handlers/seller-taxonomy.js";
+import { tools as referenceTools, handlers as referenceHandlers } from "./handlers/reference.js";
 import { loadEtsyConfig } from "./config.js";
 import {
   createEtsyApiClient,
@@ -57,6 +58,7 @@ export class EtsyServer {
       ...shopHandlers,
       ...listingHandlers,
       ...sellerTaxonomyHandlers,
+      ...referenceHandlers,
     };
 
     this.setupToolHandlers();
@@ -69,7 +71,7 @@ export class EtsyServer {
   }
 
   async listTools() {
-    return [...shopTools, ...listingTools, ...sellerTaxonomyTools];
+    return [...shopTools, ...listingTools, ...sellerTaxonomyTools, ...referenceTools];
   }
 
   async callTool(name: string, args: unknown) {

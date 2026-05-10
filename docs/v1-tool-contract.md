@@ -51,3 +51,14 @@ in this repository.
    api-client adapter. They must not construct Etsy HTTP requests directly.
 5. Tool responses should be bounded JSON objects/arrays that do not include
    bearer tokens, OAuth tokens, API keys, or deployment-specific diagnostics.
+
+## Reference tool usage guidance
+
+- `etsy_get_taxonomy_properties` is for schema/context drill-in after a listing
+  or candidate listing has a known seller taxonomy node. Recommendation agents
+  should call it only when property constraints, variation support, or allowed
+  values would materially affect a merchandising recommendation.
+- `etsy_get_shipping_profiles` is for shop-context drill-in when shipping
+  profile availability, processing windows, or cost structure may change a
+  recommendation. Agents should not call shipping write/update operations in V1;
+  this tool is read-only context only.

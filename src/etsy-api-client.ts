@@ -34,6 +34,7 @@ export interface EtsyMcpApiClient {
   getListingInventory(listingId: string): Promise<unknown>;
   getSellerTaxonomyNodes(): Promise<unknown>;
   getPropertiesByTaxonomyId(taxonomyId: string | number): Promise<unknown>;
+  getShopShippingProfiles(shopId: string): Promise<unknown>;
 }
 
 const TOKEN_BOOTSTRAP_EXPIRES_AT = new Date(0);
@@ -124,6 +125,10 @@ class EtsyApiClientAdapter implements EtsyMcpApiClient {
 
   async getPropertiesByTaxonomyId(taxonomyId: string | number): Promise<unknown> {
     return this.withClient((client) => client.getPropertiesByTaxonomyId(Number(taxonomyId)));
+  }
+
+  async getShopShippingProfiles(shopId: string): Promise<unknown> {
+    return this.withClient((client) => client.getShopShippingProfiles(shopId));
   }
 
   private async withClient<T>(operation: (client: EtsyClient) => Promise<T>): Promise<T> {
