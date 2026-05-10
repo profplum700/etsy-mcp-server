@@ -11,6 +11,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { tools as shopTools, handlers as shopHandlers } from "./handlers/shop.js";
 import { tools as listingTools, handlers as listingHandlers } from "./handlers/listing.js";
+import { tools as v1ReadTools, handlers as v1ReadHandlers } from "./handlers/v1-read-tools.js";
 import {
   tools as sellerTaxonomyTools,
   handlers as sellerTaxonomyHandlers,
@@ -56,6 +57,7 @@ export class EtsyServer {
     this.handlers = {
       ...shopHandlers,
       ...listingHandlers,
+      ...v1ReadHandlers,
       ...sellerTaxonomyHandlers,
     };
 
@@ -69,7 +71,7 @@ export class EtsyServer {
   }
 
   async listTools() {
-    return [...shopTools, ...listingTools, ...sellerTaxonomyTools];
+    return [...shopTools, ...listingTools, ...v1ReadTools, ...sellerTaxonomyTools];
   }
 
   async callTool(name: string, args: unknown) {
