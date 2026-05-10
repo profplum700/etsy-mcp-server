@@ -5,8 +5,10 @@ import {
   EtsyRateLimitError,
   TokenManager,
   type EtsyTokens,
+  type GetShopReceiptsParams,
   type ListingParams,
   type ListingState,
+  type SearchParams,
 } from "@profplum700/etsy-v3-api-client";
 
 export interface TokenProvider {
@@ -23,20 +25,61 @@ export interface EtsyApiClientConfig {
   tokenProvider?: TokenProvider;
 }
 
+export type ListingFullIncludes =
+  | "Images"
+  | "Inventory"
+  | "Translations"
+  | "Shop"
+  | "Shipping"
+  | "Videos";
+
+export interface ListingQueryParams {
+  state?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PublicListingSearchParams {
+  keywords?: string;
+  limit?: number;
+  offset?: number;
+  taxonomy_id?: number;
+  min_price?: number;
+  max_price?: number;
+}
+
+export interface ListingFullParams {
+  includes?: ListingFullIncludes[];
+}
+
+export interface ReceiptListParams {
+  limit?: number;
+  offset?: number;
+}
+
 export interface EtsyMcpApiClient {
   tokenProvider: TokenProvider;
+  searchPublicListings(params?: PublicListingSearchParams): Promise<unknown>;
   getMe(): Promise<unknown>;
   getShop(shopId: string): Promise<unknown>;
+  getShopContext(shopId?: string): Promise<unknown>;
   getShopSections(shopId: string): Promise<unknown>;
-  getListingsByShop(shopId: string, params?: { state?: string }): Promise<unknown>;
+  getListingsByShop(shopId: string, params?: ListingQueryParams): Promise<unknown>;
+  getListingFull(listingId: string, params?: ListingFullParams): Promise<unknown>;
   getListingImages(listingId: string): Promise<unknown>;
   getListingFiles(listingId: string): Promise<unknown>;
   getListingInventory(listingId: string): Promise<unknown>;
+  getReceipts(shopId: string, params?: ReceiptListParams): Promise<unknown>;
+  getReceiptFull(shopId: string, receiptId: string): Promise<unknown>;
   getSellerTaxonomyNodes(): Promise<unknown>;
   getPropertiesByTaxonomyId(taxonomyId: string | number): Promise<unknown>;
 }
 
 const TOKEN_BOOTSTRAP_EXPIRES_AT = new Date(0);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 type EtsyClientWithRawRequest = {
   makeRequest: (endpoint: string) => Promise<unknown>;
@@ -85,6 +128,17 @@ class EtsyApiClientAdapter implements EtsyMcpApiClient {
     this.tokenProvider = config.tokenProvider ?? new RefreshTokenProvider(config);
   }
 
+  async searchPublicListings(params?: PublicListingSearchParams): Promise<unknown> {
+    const searchParams: SearchParams = {};
+    if (params?.keywords !== undefined) searchParams.keywords = params.keywords;
+    if (params?.limit !== undefined) searchParams.limit = params.limit;
+    if (params?.offset !== undefined) searchParams.offset = params.offset;
+    if (params?.taxonomy_id !== undefined) searchParams.taxonomy_id = params.taxonomy_id;
+    if (params?.min_price !== undefined) searchParams.min_price = params.min_price;
+    if (params?.max_price !== undefined) searchParams.max_price = params.max_price;
+    return this.withClient((client) => client.findAllListingsActive(searchParams));
+  }
+
   async getMe(): Promise<unknown> {
     return this.withClient((client) => client.getUser());
   }
@@ -93,15 +147,36 @@ class EtsyApiClientAdapter implements EtsyMcpApiClient {
     return this.withClient((client) => client.getShop(shopId));
   }
 
+  async getShopContext(shopId?: string): Promise<unknown> {
+    const user = await this.getMe();
+    const resolvedShopId = shopId ?? (isRecord(user) ? user.shop_id : undefined);
+    if (
+      resolvedShopId === undefined ||
+      resolvedShopId === null ||
+      String(resolvedShopId).length === 0
+    ) {
+      throw new EtsyApiError("Authenticated user does not have a shop", 404);
+    }
+    const shop = await this.getShop(String(resolvedShopId));
+    return { user, shop };
+  }
+
   async getShopSections(shopId: string): Promise<unknown> {
     return this.withClient((client) => client.getShopSections(shopId));
   }
 
-  async getListingsByShop(shopId: string, params?: { state?: string }): Promise<unknown> {
-    const listingParams: ListingParams | undefined = params?.state
-      ? { state: params.state as ListingState }
-      : undefined;
+  async getListingsByShop(shopId: string, params?: ListingQueryParams): Promise<unknown> {
+    const listingParams: ListingParams = {};
+    if (params?.state !== undefined) listingParams.state = params.state as ListingState;
+    if (params?.limit !== undefined) listingParams.limit = params.limit;
+    if (params?.offset !== undefined) listingParams.offset = params.offset;
     return this.withClient((client) => client.getListingsByShop(shopId, listingParams));
+  }
+
+  async getListingFull(listingId: string, params?: ListingFullParams): Promise<unknown> {
+    return this.withClient((client) =>
+      client.getListing(listingId, params?.includes ? { includes: params.includes } : undefined)
+    );
   }
 
   async getListingImages(listingId: string): Promise<unknown> {
@@ -116,6 +191,17 @@ class EtsyApiClientAdapter implements EtsyMcpApiClient {
 
   async getListingInventory(listingId: string): Promise<unknown> {
     return this.withClient((client) => client.getListingInventory(listingId));
+  }
+
+  async getReceipts(shopId: string, params?: ReceiptListParams): Promise<unknown> {
+    const receiptParams: GetShopReceiptsParams = {};
+    if (params?.limit !== undefined) receiptParams.limit = params.limit;
+    if (params?.offset !== undefined) receiptParams.offset = params.offset;
+    return this.withClient((client) => client.getShopReceipts(shopId, receiptParams));
+  }
+
+  async getReceiptFull(shopId: string, receiptId: string): Promise<unknown> {
+    return this.withClient((client) => client.getShopReceipt(shopId, receiptId));
   }
 
   async getSellerTaxonomyNodes(): Promise<unknown> {

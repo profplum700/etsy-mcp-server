@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { tools as shopTools, handlers as shopHandlers } from "./handlers/shop.js";
 import { tools as listingTools, handlers as listingHandlers } from "./handlers/listing.js";
+import { tools as v1ReadTools, handlers as v1ReadHandlers } from "./handlers/v1-read-tools.js";
 import {
   tools as sellerTaxonomyTools,
   handlers as sellerTaxonomyHandlers,
@@ -60,11 +61,12 @@ function createWorkerServer(apiClient: EtsyMcpApiClient): Server {
   const handlers: Record<string, ToolHandler> = {
     ...shopHandlers,
     ...listingHandlers,
+    ...v1ReadHandlers,
     ...sellerTaxonomyHandlers,
   };
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [...shopTools, ...listingTools, ...sellerTaxonomyTools],
+    tools: [...shopTools, ...listingTools, ...v1ReadTools, ...sellerTaxonomyTools],
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
