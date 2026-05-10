@@ -13,6 +13,7 @@ import {
   tools as sellerTaxonomyTools,
   handlers as sellerTaxonomyHandlers,
 } from "./handlers/seller-taxonomy.js";
+import { tools as referenceTools, handlers as referenceHandlers } from "./handlers/reference.js";
 import {
   createEtsyApiClient,
   formatEtsyFailure,
@@ -63,10 +64,17 @@ function createWorkerServer(apiClient: EtsyMcpApiClient): Server {
     ...listingHandlers,
     ...v1ReadHandlers,
     ...sellerTaxonomyHandlers,
+    ...referenceHandlers,
   };
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [...shopTools, ...listingTools, ...v1ReadTools, ...sellerTaxonomyTools],
+    tools: [
+      ...shopTools,
+      ...listingTools,
+      ...v1ReadTools,
+      ...sellerTaxonomyTools,
+      ...referenceTools,
+    ],
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {

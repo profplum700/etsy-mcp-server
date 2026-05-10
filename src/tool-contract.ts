@@ -55,6 +55,17 @@ const genericArrayOutput = (description: string): JsonSchema => ({
   items: genericObjectOutput("Etsy resource object"),
 });
 
+const pagedResultsOutput = (description: string): JsonSchema => ({
+  type: "object",
+  description,
+  required: ["count", "results"],
+  additionalProperties: false,
+  properties: {
+    count: { type: "integer", description: "Total returned result count" },
+    results: genericArrayOutput("Thinned Etsy resource results"),
+  },
+});
+
 const shopIdProperty = numericId("Etsy shop ID as a decimal string");
 const listingIdProperty = numericId("Etsy listing ID as a decimal string");
 
@@ -84,7 +95,7 @@ export const V1_TOOL_CONTRACT = [
       },
       additionalProperties: false,
     },
-    outputSchema: genericArrayOutput("Public listing search results"),
+    outputSchema: pagedResultsOutput("Public listing search results"),
     testOwner: "read-tool implementation",
   },
   {
@@ -178,7 +189,7 @@ export const V1_TOOL_CONTRACT = [
       required: ["shop_id"],
       additionalProperties: false,
     },
-    outputSchema: genericArrayOutput("Shop listing page"),
+    outputSchema: pagedResultsOutput("Shop listing page"),
     testOwner: "read-tool implementation",
   },
   {
@@ -338,7 +349,7 @@ export const V1_TOOL_CONTRACT = [
       required: ["shop_id"],
       additionalProperties: false,
     },
-    outputSchema: genericArrayOutput("Receipt summaries"),
+    outputSchema: pagedResultsOutput("Receipt summaries"),
     testOwner: "read-sensitive harness",
   },
   {

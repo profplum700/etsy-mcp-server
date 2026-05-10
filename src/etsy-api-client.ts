@@ -73,6 +73,7 @@ export interface EtsyMcpApiClient {
   getReceiptFull(shopId: string, receiptId: string): Promise<unknown>;
   getSellerTaxonomyNodes(): Promise<unknown>;
   getPropertiesByTaxonomyId(taxonomyId: string | number): Promise<unknown>;
+  getShopShippingProfiles(shopId: string): Promise<unknown>;
 }
 
 const TOKEN_BOOTSTRAP_EXPIRES_AT = new Date(0);
@@ -212,6 +213,10 @@ class EtsyApiClientAdapter implements EtsyMcpApiClient {
     return this.withClient((client) => client.getPropertiesByTaxonomyId(Number(taxonomyId)));
   }
 
+  async getShopShippingProfiles(shopId: string): Promise<unknown> {
+    return this.withClient((client) => client.getShopShippingProfiles(shopId));
+  }
+
   private async withClient<T>(operation: (client: EtsyClient) => Promise<T>): Promise<T> {
     let accessToken: string;
     try {
@@ -250,6 +255,16 @@ export function createEtsyApiClient(config: EtsyApiClientConfig): EtsyMcpApiClie
   return new EtsyApiClientAdapter(config);
 }
 
+function redactSecretText(value: string): string {
+  return value
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [REDACTED]")
+    .replace(
+      /(access[_-]?token|refresh[_-]?token|api[_-]?key|shared[_-]?secret|bearer)(["'\s:=]+)[^\s"',}]+/gi,
+      "$1$2[REDACTED]"
+    )
+    .replace(/eyJ[A-Za-z0-9._~+/=-]{20,}/g, "[JWT_REDACTED]");
+}
+
 export function formatEtsyFailure(error: unknown): string {
   if (error instanceof EtsyRateLimitError) {
     return "Etsy API rate limit error";
@@ -261,11 +276,11 @@ export function formatEtsyFailure(error: unknown): string {
 
   if (error instanceof EtsyApiError) {
     const status = error.statusCode ? ` (${error.statusCode})` : "";
-    return `Etsy API error${status}: ${error.message}`;
+    return `Etsy API error${status}: ${redactSecretText(error.message)}`;
   }
 
   if (error instanceof Error) {
-    return `Error: ${error.message}`;
+    return `Error: ${redactSecretText(error.message)}`;
   }
 
   return "Error: Unknown failure";

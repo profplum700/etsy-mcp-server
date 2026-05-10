@@ -113,6 +113,9 @@ function validateSchema(schema: JsonSchema, value: unknown, path: string): void 
     if (typeof value !== "string" || value.length === 0) {
       throw new McpError(ErrorCode.InvalidParams, `${path} must be a non-empty string`);
     }
+    if (schema.description?.includes("decimal string") && !/^\d+$/.test(value)) {
+      throw new McpError(ErrorCode.InvalidParams, `${path} must be a decimal string`);
+    }
     if (schema.enum && !schema.enum.includes(value)) {
       throw new McpError(
         ErrorCode.InvalidParams,
