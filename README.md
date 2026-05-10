@@ -250,6 +250,8 @@ echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | docker run -i --rm etsy-
 
 ## Available tools
 
+The durable V1 tool contract, including planned tool names, schemas, read/write classification, permission-policy recommendations, and api-client mappings, is documented in [docs/v1-tool-contract.md](docs/v1-tool-contract.md).
+
 ### `getShop`
 
 Fetch information about a shop.
