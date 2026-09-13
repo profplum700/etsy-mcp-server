@@ -6,14 +6,14 @@ This repository implements a TypeScript Model Context Protocol (MCP) server for 
 
 ## Canon Block
 
-- **Mode:** `single-main` per the Creator Canon in `/data/projects/AGENTS.md`.
+- **Mode:** `single-main`.
 - **Default branch:** `master` is the current remote default and is the shared canon branch for this repo until it is renamed.
 - **Merge-gate command:** `npm run lint && npm test && npm run build`
 - **Standing deviations:** legacy default branch name is `master`; feature branches prefixed `fhah-tools-*` may exist only as parked fhah-tools integration work and must not be landed from this repo without explicit owner scope.
 
 ## Repository Rules
 
-- Read `/data/projects/AGENTS.md` before work; stricter user or repo-local instructions win.
+- Read this file before work; stricter user or repo-local instructions win.
 - Work canon-style on the default branch: pull/rebase, reserve files with Agent Mail before edits, run the merge gate, commit directly to the shared branch, push, and release reservations.
 - Do not commit Etsy credentials, OAuth refresh tokens, settings files containing secrets, `.env`, or MCP client private configuration.
 - This server is stdio-driven and intended to be launched by MCP clients; do not treat it as a long-running HTTP daemon unless a future design explicitly adds that mode.
