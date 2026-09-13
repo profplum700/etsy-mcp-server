@@ -1,5 +1,5 @@
 # Use Node LTS version
-FROM node:22-alpine
+FROM node:26-alpine
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
