@@ -20,7 +20,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "axios": "^1.20.0",
     "express": "^5.2.1",
     "open": "^10.1.2"
