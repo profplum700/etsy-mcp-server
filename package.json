@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",
-    "axios": "^1.10.0",
+    "axios": "^1.18.0",
     "express": "^5.1.0",
     "open": "^10.1.2"
   },
