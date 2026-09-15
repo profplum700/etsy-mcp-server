@@ -1,30 +1,48 @@
-# AGENTS.md — Etsy MCP Server
+# Etsy MCP server
 
-## Purpose
+TypeScript MCP server exposing Etsy tools over stdio. `src/index.ts` connects
+`StdioServerTransport` and routes tool definitions to `src/handlers/`.
+`CLAUDE.md` points here; keep one repository instruction source.
 
-This repository implements a TypeScript Model Context Protocol (MCP) server for the Etsy API. It exposes Etsy shop, listing, image/file, inventory, and seller-taxonomy tools over stdio for MCP clients. Credentials are supplied through `ETSY_API_KEY`, `ETSY_SHARED_SECRET`, `ETSY_REFRESH_TOKEN`, or an untracked `etsy_mcp_settings.json` copied from `etsy_mcp_settings.example.json`.
+## Scope and authority
 
-## Canon Block
+The default branch is `master`. Work in a verified, task-owned local or
+provider-hosted checkout on an isolated branch. Preserve unrelated changes and
+coordinate overlapping paths in the existing issue, not a shared mutable
+branch or a duplicate tracker. Parked `fhah-tools-*` integration branches need
+explicit owner scope before landing.
 
-- **Mode:** `single-main`.
-- **Default branch:** `master` is the current remote default and is the shared canon branch for this repo until it is renamed.
-- **Merge-gate command:** `npm run lint && npm test && npm run build`
-- **Standing deviations:** legacy default branch name is `master`; feature branches prefixed `fhah-tools-*` may exist only as parked fhah-tools integration work and must not be landed from this repo without explicit owner scope.
+Do not require Agent Mail, inherited `/data/projects/AGENTS.md`, ai-machine,
+RCH or replacement infrastructure/monitoring. Preserve historical Beads records.
+Independent review and current-revision CI remain separate from authoring;
+this file does not authorise merging, publishing or deployment.
 
-## Repository Rules
+## Protocol and credential boundaries
 
-- Read this file before work; stricter user or repo-local instructions win.
-- Work canon-style on the default branch: pull/rebase, reserve files with Agent Mail before edits, run the merge gate, commit directly to the shared branch, push, and release reservations.
-- Do not commit Etsy credentials, OAuth refresh tokens, settings files containing secrets, `.env`, or MCP client private configuration.
-- This server is stdio-driven and intended to be launched by MCP clients; do not treat it as a long-running HTTP daemon unless a future design explicitly adds that mode.
+Keep stdio protocol output separate from diagnostics; use stderr for logs.
+An HTTP daemon or new hosting arrangement is not the existing runtime model.
+Read `README.md` for client setup only when changing configuration or launch
+behaviour. `npm start` launches `build/index.js`; build first. Use
+`npm run inspector` for explicitly scoped protocol debugging, not as a gate
+for unrelated edits.
 
-## Common Commands
+`src/config.ts` prefers `ETSY_API_KEY`, `ETSY_SHARED_SECRET` and
+`ETSY_REFRESH_TOKEN`, then fills missing values from the optional untracked
+`etsy_mcp_settings.json`. Keep credentials, refresh tokens, secret settings,
+`.env` and private MCP client configuration out of Git, logs and evidence.
+Tests must use synthetic credentials in a task-owned test checkout: the current
+config loader deletes the optional settings file when `NODE_ENV=test`.
+Never run that test path with an owner's real settings file present.
 
-```bash
-npm install
-npm run lint
-npm test
-npm run build
-npm start
-npm run inspector
-```
+Live verification requires explicit authority for the shop and operation;
+do not mutate listings, inventory or other real shop data merely to prove
+that a code change works. Mocked responses are not live Etsy proof.
+
+## Checks and completion
+
+Match `.github/workflows/ci.yml`: Node 22, `npm ci`, lint, build and Vitest.
+The existing local gate is `npm run lint && npm test && npm run build`.
+Use relevant existing tests while editing; preserve the full current-revision
+CI gate and configured hooks. Report checks not run rather than bypassing or
+weakening them. A successful build does not prove an MCP client connection or
+a live Etsy journey; report those boundaries separately with the revision.
